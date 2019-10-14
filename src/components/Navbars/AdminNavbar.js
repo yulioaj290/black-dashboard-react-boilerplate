@@ -24,6 +24,7 @@ class AdminNavbar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            employer: JSON.parse(localStorage.getItem("employer")),
             collapseOpen: false,
             modalSearch: false,
             color: "navbar-transparent"
@@ -73,6 +74,7 @@ class AdminNavbar extends React.Component {
     };
 
     render() {
+        const {employer} = this.state;
         return (
             <>
                 <Navbar
@@ -96,8 +98,8 @@ class AdminNavbar extends React.Component {
                                     <span className="navbar-toggler-bar bar3"/>
                                 </button>
                             </div>
-                            <NavbarBrand href="#pablo" onClick={e => e.preventDefault()}>
-                                {this.props.brandText}
+                            <NavbarBrand href="/public/job-list">
+                                {employer.name}
                             </NavbarBrand>
                         </div>
                         <button
@@ -183,14 +185,17 @@ class AdminNavbar extends React.Component {
                                     </DropdownToggle>
                                     <DropdownMenu className="dropdown-navbar" right tag="ul">
                                         <NavLink tag="li">
-                                            <DropdownItem className="nav-item">Profile</DropdownItem>
+                                            <DropdownItem tag={"a"} href={"/admin/user-profile"} className="nav-item">{employer.name}</DropdownItem>
                                         </NavLink>
                                         <NavLink tag="li">
                                             <DropdownItem className="nav-item">Settings</DropdownItem>
                                         </NavLink>
                                         <DropdownItem divider tag="li"/>
                                         <NavLink tag="li">
-                                            <DropdownItem className="nav-item" onClick={(e) => this.props.handleLogout(e)}>Log out</DropdownItem>
+                                            <DropdownItem className="nav-item"
+                                                          onClick={(e) => this.props.handleLogout(e)}>
+                                                Log out
+                                            </DropdownItem>
                                         </NavLink>
                                     </DropdownMenu>
                                 </UncontrolledDropdown>

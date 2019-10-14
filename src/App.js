@@ -2,8 +2,10 @@ import React, {Component} from 'react';
 import {Router, Route, Switch, Redirect} from "react-router-dom";
 import {PrivateRoute} from './routing/PrivateRoute';
 import AdminLayout from './layouts/Admin/Admin';
-import LoginForm from './views/Login';
+import LoginForm from './views/public/Login';
 import {createBrowserHistory} from "history";
+import PublicLayout from "./views/public/PublicLayout";
+import Register from "./views/public/Register";
 
 /* Font Awesome Library */
 // import {library} from '@fortawesome/fontawesome-svg-core'
@@ -16,38 +18,13 @@ import {createBrowserHistory} from "history";
 const hist = createBrowserHistory();
 
 class App extends Component {
-    state = {
-        isLoggedIn: !!localStorage.getItem('ts_api_token'),
-        loginErrors: false
-    };
-
-    // componentDidMount() {
-    //     if (this.state.isLoggedIn) {
-    //         fetch(process.env.REACT_APP_API_URL + 'token/', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify({
-    //                 refresh: localStorage.getItem('ts_api_refresh')
-    //             })
-    //         })
-    //             .then(response => response.json())
-    //             .then(json => {
-    //                 if (typeof json.code !== "undefined" && json.code === "token_not_valid") {
-    //                     this.setState({isLoggedIn: false});
-    //                     localStorage.removeItem('ts_api_token');
-    //                     localStorage.removeItem('ts_api_refresh');
-    //                     this.setState({isLoggedIn: false});
-    //                 } else {
-    //                     localStorage.setItem('ts_api_token', json.access);
-    //                     // console.log(localStorage.getItem('ts_api_token'));
-    //                 }
-    //             });
-    //     } else {
-    //         this.setState({isLoggedIn: false});
-    //     }
-    // }
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoggedIn: !!localStorage.getItem('auth-token')
+        };
+        this.loginRef = React.createRef();
+    }
 
     handleLogin(e, credentials) {
         e.preventDefault();
@@ -60,52 +37,48 @@ class App extends Component {
             body: JSON.stringify(credentials)
         })
             .then(response => response.json())
-            .then(json => {
-                if (json.hasOwnProperty('access') && json.hasOwnProperty('refresh')) {
-                    localStorage.setItem('ts_api_token', json.access);
-                    localStorage.setItem('ts_api_refresh', json.refresh);
+            .then(jsonRes => {
+                if (jsonRes.hasOwnProperty('auth-token') && jsonRes.hasOwnProperty('auth-refresh')) {
+                    localStorage.setItem('auth-token', jsonRes['auth-token']);
+                    localStorage.setItem('auth-refresh', jsonRes['auth-refresh']);
+                    localStorage.setItem('employer', JSON.stringify(jsonRes['employer']));
 
                     this.setState({isLoggedIn: true});
-                    this.onDismissMessage();
-                } else if (json.hasOwnProperty('detail')) {
-                    this.setState({loginErrors: "bad-credentials"})
+                } else if (jsonRes.hasOwnProperty('message')) {
+                    this.loginRef.current.notifyError("bad-credentials");
                 }
             })
-            // .catch((error) => {
-            .catch(() => {
-                this.setState({loginErrors: "bad-network"})
+            .catch((err) => {
+                console.log(err);
+                this.loginRef.current.notifyError("bad-network");
             });
     }
 
     handleLogout(e) {
         e.preventDefault();
 
-        localStorage.removeItem('ts_api_token');
+        localStorage.removeItem('auth-token');
+        localStorage.removeItem('employer');
         localStorage.removeItem('ts_api_refresh');
         this.setState({isLoggedIn: false});
     }
 
-    onDismissMessage() {
-        this.setState({loginErrors: false})
-    }
-
     render() {
-        const {isLoggedIn, loginErrors} = this.state;
+        const {isLoggedIn} = this.state;
         return (
             <Router history={hist}>
                 <Switch>
                     <Redirect exact from="/" to="/login"/>
+                    <Route path="/public" component={PublicLayout}/>
+                    <Route path="/register" component={Register}/>
                     <Route path="/login" render={props => (
                         <LoginForm handleLogin={(e, credentials) => this.handleLogin(e, credentials)}
-                                   {...props} isLoggedIn={isLoggedIn} loginErrors={loginErrors}
-                                   dismissMessage={() => {
-                                       this.onDismissMessage()
-                                   }}/>
+                                   {...props} isLoggedIn={isLoggedIn} ref={this.loginRef}/>
                     )}/>
 
                     <Redirect exact from="/admin" to="/admin/dashboard"/>
-                    <PrivateRoute path="/admin" component={AdminLayout}
-                                  handleLogout={(e) => this.handleLogout(e)} isLoggedIn={isLoggedIn}/>
+                    <PrivateRoute path="/admin" component={AdminLayout} isLoggedIn={isLoggedIn}
+                                  handleLogout={(e) => this.handleLogout(e)}/>
 
                     {/*<Route path="/admin" component={AdminLayout}/>*/}
                     {/*<Route component={NotFound}/>*/}

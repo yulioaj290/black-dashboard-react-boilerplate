@@ -1,0 +1,96 @@
+/**
+ ========================================================
+ * MAIN STYLE OF JOB POSTING FRONTEND
+ ========================================================
+ */
+// ======================================================
+// * IMPORT SECTION
+// ======================================================
+@import "black-dashboard-react";
+@import "../demo/demo.css";
+@import "../css/nucleo-icons.css";
+
+// ======================================================
+// * VARIABLES
+// ======================================================
+
+.form-group .form-check-input {
+  position: relative;
+  margin: 0 8px 0 0;
+  top: 4px;
+}
+
+#job-list {
+  .card-header {
+    h1, h2 {
+      text-align: center;
+
+      a, .card-action {
+        display: block;
+        padding-top: 15px;
+      }
+      .badge {
+        position: relative;
+        top: -3px;
+        font-size: 14px;
+      }
+    }
+
+    h2 {
+      font-weight: 400;
+    }
+  }
+}
+
+.table tr > th {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+@media (min-width: 992px) {
+  #job-list {
+    .card-header {
+      h1, h2 {
+        text-align: left;
+
+        a, .card-action {
+          display: inline;
+          button {
+            float: right;
+            top: -10px;
+          }
+        }
+      }
+    }
+  }
+}
+
+%full-width-force {
+  width: $full-width !important;
+}
+
+body:not(.white-content) {
+
+  .scheduler {
+    color: $gray-400;
+
+    .ant-radio-button-wrapper {
+      color: $gray-400;
+      background: $transparent-bg;
+      border-color: $gray-500;
+
+      &:not(:first-child)::before {
+        background-color: transparent;
+      }
+
+      &:hover {
+        background-color: $opacity-1;
+      }
+
+      &.ant-radio-button-wrapper-checked {
+        background: $info-states;
+        border-color: $info;
+      }
+    }
+
+  }
+}
